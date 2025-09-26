@@ -34,7 +34,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NOTIF_TOKEN }}
           INPUT_SINCE: ${{ inputs.since }}
-          DAYS_BACK: '3'
+          DAYS_BACK: '21'
           DRY_RUN: 'true'
           APPLY_CHANGES: 'false'
         run: node remove_phantom_notifications.cjs "${INPUT_SINCE}"
