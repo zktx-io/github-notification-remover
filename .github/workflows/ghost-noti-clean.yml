@@ -1,0 +1,41 @@
+name: Notifications Test
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      discussions: read
+      pull-requests: read
+      # Note: For notifications across all repos/orgs, a Personal Access Token with "notifications" scope is recommended.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Dry-run (no mutations)
+        if: ${{ github.event_name == 'release' || inputs.apply != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.NOTIF_TOKEN }}
+          INPUT_SINCE: ${{ inputs.since }}
+          DAYS_BACK: '3'
+          DRY_RUN: 'true'
+          APPLY_CHANGES: 'false'
+        run: node remove_phantom_notifications.cjs "${INPUT_SINCE}"
+
+      - name: Apply changes (mutates state)
+        if: ${{ github.event_name != 'release' && inputs.apply == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.NOTIF_TOKEN }}
+          INPUT_SINCE: ${{ inputs.since }}
+          DAYS_BACK: '3'
+          DRY_RUN: 'false'
+          APPLY_CHANGES: 'true'
+        run: node remove_phantom_notifications.cjs "${INPUT_SINCE}"
